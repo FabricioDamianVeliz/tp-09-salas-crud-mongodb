@@ -1,0 +1,11 @@
+body { font-family: Arial, sans-serif; background: #f9f9f9; color: #333; margin: 0; }
+header nav { background: #0056b3; padding: 15px; }
+header nav a { color: white; margin-right: 20px; text-decoration: none; font-weight: bold; }
+header nav a:focus, input:focus, select:focus { outline: 3px solid #ffc107; }
+main { max-width: 800px; margin: 20px auto; padding: 0 20px; }
+.tarjeta { background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.btn { display: inline-block; padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; }
+.alerta { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #f5c6cb; }
+form label { display: block; margin-top: 15px; font-weight: bold; }
+form input, form select { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+footer { text-align: center; padding: 20px; margin-top: 40px; background: #eee; }

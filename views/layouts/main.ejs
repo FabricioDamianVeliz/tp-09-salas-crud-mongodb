@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= titulo %></title>
+    <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">Inicio</a>
+            <a href="/reservas">Catálogo de Reservas</a>
+            <a href="/reservas/nueva">Reservar Sala</a>
+        </nav>
+    </header>
+    
+    <main>
+        <%- body %>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Sistema de Bibliotecas.</p>
+        <small style="color: #888;">ID Solicitud: <%= solicitudId %></small>
+    </footer>
+</body>
+</html>
