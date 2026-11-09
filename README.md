@@ -47,7 +47,7 @@ La API puede probarse utilizando la colección de Postman incluida, la cual cuen
 
 **Para POST y PUT (Creación o Reemplazo total):**
 
-````json
+```json
 {
   "estudiante": "Juan Pérez",
   "email": "juan@ejemplo.com",
@@ -60,6 +60,7 @@ La API puede probarse utilizando la colección de Postman incluida, la cual cuen
 ```
 
 **Para PATCH (Modificación parcial):**
+
 ```json
 {
   "personas": 2
@@ -82,4 +83,3 @@ Para demostrar la persistencia en MongoDB y el correcto manejo del CRUD completo
 4. **Reinicio del servidor:** Se detuvo el proceso de Node.js en la terminal (`Ctrl + C`) cortando la conexión a la base de datos, y se volvió a arrancar con `npm start`.
 5. **Comprobación de persistencia:** Sin repetir las peticiones de modificación, se volvió a ejecutar un `GET` sobre el mismo ID. El recurso respondió correctamente con estado `200` y los cambios del PUT y PATCH persistieron intactos.
 6. **Borrado definitivo:** Se envió un `DELETE /api/reservas/:id`. Respondió con estado `204 No Content`. Al volver a consultar el mismo ID con un `GET`, el sistema respondió con un `404 Not Found`, confirmando la eliminación física y manteniendo el conteo actualizado en `/estado`.
-````
