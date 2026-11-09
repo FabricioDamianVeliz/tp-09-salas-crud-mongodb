@@ -57,12 +57,14 @@ La API puede probarse utilizando la colección de Postman incluida, la cual cuen
   "personas": 4,
   "estado": "confirmada"
 }
+```
 
 **Para PATCH (Modificación parcial):**
 ```json
 {
   "personas": 2
 }
+```
 
 ## 6. Límites de Validación y Arquitectura
 
