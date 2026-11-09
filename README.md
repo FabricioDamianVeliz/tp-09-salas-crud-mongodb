@@ -29,63 +29,55 @@ Para iniciar el servidor web y la API en modo de desarrollo con carga automátic
 npm start
 ```
 
-5. Guía de Postman y Endpoints
-   La API puede probarse utilizando la colección de Postman incluida. En las peticiones POST, PUT y PATCH se debe usar la pestaña Body, opción raw, formato JSON y comprobar el header Content-Type: application/json.
+## 5. Guía de Postman y Endpoints
 
-Endpoints Disponibles
-GET /api/reservas: Listado general. Admite filtrado (ej. ?sala=Sala Norte).
+La API puede probarse utilizando la colección de Postman incluida, la cual cuenta con peticiones preparadas para listar, crear, filtrar, actualizar y eliminar registros. En las peticiones `POST`, `PUT` y `PATCH` se debe usar la pestaña Body, opción raw, formato JSON y comprobar el header `Content-Type: application/json`.
 
-GET /api/reservas/:id: Consulta el detalle de una reserva por ID.
+### Endpoints Disponibles
 
-POST /api/reservas: Crea una reserva (estado por defecto: pendiente) y retorna el header Location.
+- **GET `/api/reservas`**: Listado general. Admite filtrado (ej. `?sala=Sala Norte`).
+- **GET `/api/reservas/:id`**: Consulta el detalle de una reserva por ID.
+- **POST `/api/reservas`**: Crea una reserva (estado por defecto: `pendiente`) y retorna el header `Location`.
+- **PUT `/api/reservas/:id`**: Reemplazo completo del documento. Exige el envío de los 7 campos obligatorios (incluyendo `estado`).
+- **PATCH `/api/reservas/:id`**: Modificación parcial. Sólo permite editar `personas` y/o `estado`.
+- **DELETE `/api/reservas/:id`**: Eliminación física de la base de datos. Retorna estado `204 No Content` sin cuerpo.
+- **GET `/estado`**: Retorna metadatos del servicio, cantidad de registros y `solicitudId`.
 
-PUT /api/reservas/:id: Reemplazo completo del documento. Exige el envío de los 7 campos obligatorios (incluyendo estado).
+### Ejemplos de Payloads JSON
 
-PATCH /api/reservas/:id: Modificación parcial. Sólo permite editar personas y/o estado.
+**Para POST y PUT (Creación o Reemplazo total):**
 
-DELETE /api/reservas/:id: Eliminación física de la base de datos. Retorna estado 204 No Content sin cuerpo.
-
-GET /estado: Retorna metadatos del servicio, cantidad de registros y solicitudId.
-
-Ejemplos de Payloads JSON
-Para PUT (Reemplazo total):
-
+````json
 {
-"estudiante": "Juan Pérez",
-"email": "juan@ejemplo.com",
-"sala": "Sala Norte",
-"fecha": "2026-11-20",
-"turno": "Mañana",
-"personas": 4,
-"estado": "confirmada"
+  "estudiante": "Juan Pérez",
+  "email": "juan@ejemplo.com",
+  "sala": "Sala Norte",
+  "fecha": "2026-11-20",
+  "turno": "Mañana",
+  "personas": 4,
+  "estado": "confirmada"
 }
 
-Para PATCH (Modificación parcial):
-
+**Para PATCH (Modificación parcial):**
+```json
 {
-"personas": 2
+  "personas": 2
 }
 
-6. Límites de Validación y Arquitectura
-   Validación Estricta Mongoose: El sistema utiliza la configuración runValidators: true en las actualizaciones para garantizar que las reglas del esquema (rangos numéricos, presencia de @ en el email, enumeraciones permitidas) no se evadan al modificar un registro.
+## 6. Límites de Validación y Arquitectura
 
-Protección contra creaciones accidentales: Se emplea la configuración upsert: false. Si se envía un PUT o PATCH a un ID inexistente, el sistema responde 404 y no crea un documento fantasma.
+- **Límites:** El sistema rechaza cuerpos vacíos y valida estrictamente que la cantidad de personas sea un número entero entre 1 y 6. El email debe contener un `@` y las salas/turnos deben coincidir exactamente con los valores permitidos (`enum`). Los campos adicionales enviados son filtrados o rechazados para proteger la integridad de la base de datos.
+- **Validación Estricta en Actualizaciones:** Se implementó `runValidators: true` y `upsert: false` en las operaciones `PUT` y `PATCH` de Mongoose para asegurar que las reglas del esquema no se evadan al modificar y evitar la creación de documentos fantasmas en IDs inexistentes.
+- **Imports retirados:** Se eliminó cualquier uso del módulo `fs` (File System) y de arreglos en memoria. Toda la persistencia y la lógica CRUD recaen exclusivamente en MongoDB Atlas.
 
-Filtro de inyecciones: El middleware de la API rechaza explícitamente peticiones con cuerpos vacíos, atributos no permitidos, o inyecciones de operadores de MongoDB (como $set), retornando 400 Bad Request.
+## 7. Matriz de Pruebas: Ensayo de Persistencia y Continuidad
 
-Diferencia conceptual: Eliminar (DELETE) borra el documento físicamente (devolviendo 404 en futuras consultas), mientras que cambiar el estado a "pendiente" o "confirmada" (PATCH) altera su ciclo de vida lógico conservando el registro (200).
+Para demostrar la persistencia en MongoDB y el correcto manejo del CRUD completo, se ejecutó el siguiente flujo de pruebas:
 
-7. Matriz de Pruebas: Ensayo de Persistencia y Continuidad
-   Para demostrar la persistencia en MongoDB y el correcto manejo de las nuevas operaciones CRUD, se ejecutó el siguiente flujo de pruebas:
-
-Creación inicial: Se envió un POST /api/reservas. La API respondió con 201 Created y generó un nuevo recurso en estado pendiente. Se copió el id.
-
-Reemplazo total: Se envió un PUT /api/reservas/:id utilizando el ID copiado, enviando los 7 campos para cambiar el estado a confirmada. Respondió con 200 OK y el documento modificado. Se ensayó omitir un campo y respondió exitosamente con un 400.
-
-Modificación parcial: Se envió un PATCH /api/reservas/:id enviando únicamente {"personas": 2}. Respondió 200 OK, alterando solo ese campo y conservando el estado previo. Se intentó modificar la sala en un PATCH y el sistema lo rechazó con un 400.
-
-Reinicio del servidor: Se detuvo el proceso de Node.js en la terminal (Ctrl + C) y se volvió a arrancar con npm start.
-
-Comprobación de persistencia: Se ejecutó un GET sobre el mismo ID. El recurso respondió con estado 200, manteniendo los cambios realizados en los pasos 2 y 3 intactos, comprobando la persistencia.
-
-Borrado definitivo: Se envió un DELETE /api/reservas/:id. Respondió con 204 No Content. Al volver a consultar el mismo ID con un GET (o repetir el DELETE), el sistema respondió con un 404 Not Found, confirmando la eliminación física.
+1. **Creación:** Se envió un `POST /api/reservas` con un payload válido. La API respondió con estado `201 Created`, incluyendo el header `Location` y el nuevo `id` textual en el cuerpo.
+2. **Reemplazo total:** Se envió un `PUT /api/reservas/:id` utilizando el ID generado, enviando los 7 campos obligatorios para actualizar el estado. Respondió con `200 OK` y el documento modificado. Se ensayó omitir un campo y respondió con `400 Bad Request`.
+3. **Modificación parcial:** Se envió un `PATCH /api/reservas/:id` con un cambio específico (ej. `{"personas": 2}`). Respondió `200 OK`, alterando únicamente ese valor y conservando el resto intacto.
+4. **Reinicio del servidor:** Se detuvo el proceso de Node.js en la terminal (`Ctrl + C`) cortando la conexión a la base de datos, y se volvió a arrancar con `npm start`.
+5. **Comprobación de persistencia:** Sin repetir las peticiones de modificación, se volvió a ejecutar un `GET` sobre el mismo ID. El recurso respondió correctamente con estado `200` y los cambios del PUT y PATCH persistieron intactos.
+6. **Borrado definitivo:** Se envió un `DELETE /api/reservas/:id`. Respondió con estado `204 No Content`. Al volver a consultar el mismo ID con un `GET`, el sistema respondió con un `404 Not Found`, confirmando la eliminación física y manteniendo el conteo actualizado en `/estado`.
+````
